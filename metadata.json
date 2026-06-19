@@ -1,0 +1,6 @@
+{
+  "name": "Final Clue",
+  "description": "Multi-agent case-linkage & evidence-triage system for cold cases, featuring a presentation-layer case similarity force net and heatmap matrix, alongside L1 advanced bilingual handwriting recognition.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
