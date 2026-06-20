@@ -1,10 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CaseSeriesBoard } from './components/CaseSeriesBoard';
-import { mockCases, mockLinkages } from './data/mock';
 import { Layers } from 'lucide-react';
+import { dedupedFetch } from './utils/apiClient';
+import { Case, Linkage } from './types';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'linkages' | 'series'>('series');
+  const [cases, setCases] = useState<Case[]>([]);
+  const [linkages, setLinkages] = useState<Linkage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        // Phantom: Use dedupedFetch to grab data safely via API Client
+        const [casesData, linkagesData] = await Promise.all([
+          dedupedFetch<Case[]>('/api/cases'),
+          dedupedFetch<Linkage[]>('/api/linkages')
+        ]);
+        setCases(casesData);
+        setLinkages(linkagesData);
+      } catch (err) {
+        console.error("Failed to fetch app data", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -33,8 +57,12 @@ export default function App() {
         </header>
 
         <main>
-          {activeTab === 'series' ? (
-            <CaseSeriesBoard cases={mockCases} linkages={mockLinkages} />
+          {loading ? (
+             <div className="bg-white p-8 rounded-xl shadow-sm text-center">
+               <p className="text-gray-500">Loading cases...</p>
+             </div>
+          ) : activeTab === 'series' ? (
+            <CaseSeriesBoard cases={cases} linkages={linkages} />
           ) : (
             <div className="bg-white p-8 rounded-xl shadow-sm text-center">
               <h2 className="text-xl font-medium text-gray-600">Pairwise Linkages View (Placeholder)</h2>

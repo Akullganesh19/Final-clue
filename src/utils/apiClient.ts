@@ -41,6 +41,7 @@ export async function dedupedFetch<T>(url: string, options?: RequestInit): Promi
           const promise = fetchFresh<T>(url, options)
             .catch((err) => {
               console.error(`[Phantom] Background refresh failed for ${url}`, err);
+              // Do not re-throw to prevent Unhandled Promise Rejection for background task
             })
             .finally(() => {
               inFlight.delete(cacheKey);
@@ -54,7 +55,19 @@ export async function dedupedFetch<T>(url: string, options?: RequestInit): Promi
 
   // If we already have a fetch in flight for this URL, wait for it (Request Coalescing)
   if (isGet && inFlight.has(cacheKey)) {
-    return inFlight.get(cacheKey) as Promise<T>;
+    try {
+      return await inFlight.get(cacheKey) as Promise<T>;
+    } catch (error) {
+      // Graceful degradation: If coalesced fetch fails, try to return stale data even if past STALE_TTL
+      if (isGet) {
+        const cached = cache.get(cacheKey);
+        if (cached) {
+          console.warn(`[Phantom] Coalesced fetch failed, falling back to stale cache for ${url}`);
+          return cached.data;
+        }
+      }
+      throw error;
+    }
   }
 
   const promise = fetchFresh<T>(url, options).finally(() => {
