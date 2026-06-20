@@ -1,5 +1,8 @@
 import { AuditTrail } from '../types';
 
+/**
+ * @deprecated Use generateSecureAuditHash instead. This insecure 32-bit hash is prone to collisions and not suitable for a tamper-evident audit trail.
+ */
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
   let hash = 0;
@@ -11,6 +14,18 @@ export function generateAuditHash(previousHash: string, action: string, details:
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
 
+export async function generateSecureAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): Promise<string> {
+  const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+  const msgBuffer = new TextEncoder().encode(combined);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return 'SHA256-' + hashHex;
+}
+
+/**
+ * @deprecated Use createSecureAuditLog instead.
+ */
 export function createAuditLog(
   logs: AuditTrail[],
   action: string,
@@ -21,6 +36,29 @@ export function createAuditLog(
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+
+  const newLog: AuditTrail = {
+    id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    timestamp,
+    action,
+    details,
+    author,
+    hash
+  };
+
+  return [...logs, newLog];
+}
+
+export async function createSecureAuditLog(
+  logs: AuditTrail[],
+  action: string,
+  details: string,
+  author: string = "Investigator (Arjun Som)"
+): Promise<AuditTrail[]> {
+  const lastLog = logs[logs.length - 1];
+  const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+  const timestamp = new Date().toISOString();
+  const hash = await generateSecureAuditHash(previousHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,

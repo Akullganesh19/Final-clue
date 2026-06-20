@@ -1,0 +1,6 @@
+## 2025-06-20 — Web Crypto Audit Trail Migration
+**Risk identified:** The application relies on a custom, synchronous 32-bit integer hashing algorithm (`generateAuditHash`) to create a "tamper-evident" audit trail. This is cryptographically insecure and prone to collisions. As evidence and logs compound over time, this mechanism will fail to guarantee chain-of-custody, making the core trust model of the application entirely useless and requiring a costly rewrite of all historical hashes.
+**Migration target:** The ecosystem is standardizing around `crypto.subtle.digest('SHA-256')` (Web Crypto API) for secure, standard, and collision-resistant hashing in JavaScript.
+**Migrated this session:** Built `generateSecureAuditHash` and `createSecureAuditLog` as asynchronous drop-in replacements using SHA-256. Deprecated the old synchronous variants to prevent future use.
+**Remaining:** Migrate all call sites in the application that consume `createAuditLog` to `await createSecureAuditLog`, then eventually remove the deprecated functions once backwards compatibility is no longer required.
+**Next session:** Start tracking down the components or utilities that call `createAuditLog` and update them to use the async version.
