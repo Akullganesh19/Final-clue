@@ -15,7 +15,7 @@ export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
-  author: string = "Investigator (Arjun Som)"
+  author: string = "Investigator"
 ): AuditTrail[] {
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
