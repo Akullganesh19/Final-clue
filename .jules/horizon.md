@@ -1,6 +1,6 @@
 ## 2025-06-21 — Replace Webpack CI with Vite/Esbuild CI
 **Risk identified:** The GitHub Actions CI pipeline uses Webpack and tests on Node 18 (`webpack.yml`). The project is actually using Vite and esbuild, meaning the CI tests were either failing or checking irrelevant things. Node 18 is also deprecated and causes `EBADENGINE` errors with current project dependencies (like `@google/genai` and TailwindCSS), creating build breaks and a false sense of security.
 **Migration target:** Switch CI tooling to natively test Vite/esbuild builds using the `npm run build` script and run checks solely on supported Node.js versions (20.x, 22.x).
-**Migrated this session:** Replaced `.github/workflows/webpack.yml` with `.github/workflows/build.yml` running Node 20.x and 22.x, using `npm run build`.
+**Migrated this session:** Replaced `.github/workflows/webpack.yml` with `.github/workflows/build.yml` running Node 20.x and 22.x, using `npm run build`. Also added missing stub files `server.ts` and `src/App.tsx` because otherwise the newly-working build fails immediately complaining about missing modules.
 **Remaining:** Verify if any other legacy Webpack or Node 18 configuration remains in other files (like deprecated dependencies).
 **Next session:** Remove any remaining Webpack-specific dependencies from `package.json` if they exist, or check for further dependency modernization.
