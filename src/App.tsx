@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Case } from './types';
 
 // 🛸 ORACLE PREDICTIVE PREFETCH
 // Predicts what case the investigator will open next and silently preloads it

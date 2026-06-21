@@ -9,7 +9,7 @@ test('Prediction engine API degrades gracefully when case not found', async () =
     json: (data: any) => { jsonResponse = data; }
   };
 
-  const route = app._router.stack.find((r: any) => r.route && r.route.path === '/api/predict-next-case');
+  const route = (app as any)._router.stack.find((r: any) => r.route && r.route.path === '/api/predict-next-case');
   if (route) {
     const handler = route.route.stack[0].handle;
     handler(req, res, () => {});
