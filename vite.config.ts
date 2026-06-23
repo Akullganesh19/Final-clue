@@ -15,6 +15,9 @@ export default defineConfig(() => {
       port: 5173,
       strictPort: false,
       open: true,
+      proxy: {
+        '/api': 'http://localhost:3000',
+      },
     },
   };
 });
