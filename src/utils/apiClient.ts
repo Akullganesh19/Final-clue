@@ -10,6 +10,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export async function dedupedFetch(url: string, options?: RequestInit) {
   const isGet = !options?.method || options.method.toUpperCase() === 'GET';
+  const start = performance.now();
 
   if (!isGet) {
     const response = await fetch(url, options);
@@ -33,22 +34,28 @@ export async function dedupedFetch(url: string, options?: RequestInit) {
           })
           .then(data => {
             cache.set(cacheKey, { data, timestamp: Date.now() });
+            console.debug(`[Phantom] Background refresh complete for ${url}`);
             return data;
           })
           .catch(err => {
-            console.error('Background revalidation failed:', err);
+            console.error('[Phantom] Background revalidation failed:', err);
           })
           .finally(() => inFlight.delete(cacheKey));
         inFlight.set(cacheKey, promise);
       }
+      console.debug(`[Phantom] Stale hit for ${url} (took ${Math.round(performance.now() - start)}ms)`);
+    } else {
+      console.debug(`[Phantom] Cache hit for ${url} (took ${Math.round(performance.now() - start)}ms)`);
     }
     return cached.data;
   }
 
   if (inFlight.has(cacheKey)) {
+    console.debug(`[Phantom] Coalesced request for ${url} (avoided duplicate fetch)`);
     return inFlight.get(cacheKey);
   }
 
+  console.debug(`[Phantom] Cache miss for ${url}, fetching from network...`);
   const promise = fetch(url, options)
     .then(async res => {
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -56,6 +63,7 @@ export async function dedupedFetch(url: string, options?: RequestInit) {
     })
     .then(data => {
       cache.set(cacheKey, { data, timestamp: Date.now() });
+      console.debug(`[Phantom] Network fetch complete for ${url} (took ${Math.round(performance.now() - start)}ms)`);
       return data;
     })
     .finally(() => inFlight.delete(cacheKey));
