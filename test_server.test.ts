@@ -17,9 +17,17 @@ test('health endpoint should return 200', async () => {
 });
 
 test('analyze endpoint should return fallback if AI fails', async () => {
-    const response = await request(server).get('/api/analyze/123');
-    assert.strictEqual(response.status, 200);
-    assert.ok(response.body.analysis.includes('Analysis unavailable at this time'));
+    // Force API Key to be undefined for this test to trigger fallback
+    const originalKey = process.env.GEMINI_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+
+    try {
+        const response = await request(server).get('/api/analyze/123');
+        assert.strictEqual(response.status, 200);
+        assert.ok(response.body.analysis.includes('Analysis unavailable at this time'));
+    } finally {
+        if (originalKey) process.env.GEMINI_API_KEY = originalKey;
+    }
 });
 
 after(() => {
