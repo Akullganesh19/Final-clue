@@ -32,4 +32,4 @@ jobs:
       run: npm run build
 
     - name: Test
-      run: npx tsx --test "src/**/*.test.ts"
+      run: npm run test
