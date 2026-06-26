@@ -1,0 +1,6 @@
+## 2025-06-26 — Cold Case Solvability Scorer
+**Product understood as:** A multi-agent case-linkage and evidence-triage system for cold cases.
+**Derivation reasoning:** This product has Cases with rich entity data (persons, vehicles, weapons, locations) and Modus Operandi (MO) categories. Users triage and investigate these cold cases. Therefore users obviously need an automated Solvability Scorer — because investigators waste time manually reviewing cases with zero evidence, when the system already knows which cases have the richest data and highest likelihood of being solved. It doesn't exist because the platform focused initially on linking cases together, rather than triaging individual case viability. I'm building it because it gives investigators an immediate, actionable prioritized list of where to spend their time.
+**Feature built:** An automated Solvability Scorer endpoint (`/api/cases/solvability`) and a Triage Dashboard UI that ranks cases from 0-100 based on data completeness (entities, MO, evidence).
+**User impact:** Users can now instantly see which cold cases have the highest potential for being solved based on existing data, saving hours of manual triage.
+**Next logical feature:** A 'Missing Link' predictor that highlights which specific missing entity (e.g. "Needs Vehicle description") would increase a case's solvability score the most.
