@@ -1,0 +1,1 @@
+// Do not create new boilerplate or stub files (like App.tsx or server.ts) just to satisfy build/lint errors or code review warnings about 'dead code' if they are missing from the repository. Adding these violates the core principle of deleting more than you add.
