@@ -1,0 +1,33 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js 22.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+
+    - name: Install dependencies
+      run: corepack enable pnpm && pnpm install
+
+    - name: Lint
+      run: pnpm lint
+      continue-on-error: true
+
+    - name: Build
+      run: pnpm build
+      continue-on-error: true
+
+    - name: Test
+      run: pnpm test
