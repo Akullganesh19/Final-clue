@@ -1,7 +1,7 @@
-import React from 'react';
 import { eventBus } from './eventBus';
 import { AgentLog, AuditTrail } from '../types';
 import { createAuditLog } from './audit';
+import React from 'react';
 
 export function setupAgentAuditBridge(setLogs: React.Dispatch<React.SetStateAction<AuditTrail[]>>) {
   const unsubscribe = eventBus.on('agent.action', (log: AgentLog) => {
