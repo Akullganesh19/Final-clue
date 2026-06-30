@@ -26,7 +26,9 @@ jobs:
       run: npm install -g pnpm
 
     - name: Configure pnpm
-      run: pnpm config set minimum-release-age 0
+      run: |
+        pnpm config set minimum-release-age 0
+        pnpm config set ignore-scripts true
 
     - name: Install dependencies
       run: pnpm install
