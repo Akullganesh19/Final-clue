@@ -1,0 +1,6 @@
+## 2024-03-24 — Enforce OCC on Audit Ledger
+**Value type:** Audit Trail append operations / Log ledger state
+**Drift risk found:** The ledger appending logic (`createAuditLog`) was vulnerable to concurrent read-modify-write drifts. If two processes appended to the same base state, one would silently overwrite the other's state because it lacked Optimistic Concurrency Control (OCC).
+**Fix:** Introduced an `expectedParentHash` argument to `createAuditLog` and updated all internal validation to check that the current end of the log chain matches `expectedParentHash` before generating the new hash and appending. Also upgraded hash creation to securely serialize data and use async `crypto.subtle.digest` via the Web Crypto API, avoiding legacy bitwise functions. Swapped to `crypto.randomUUID()` for robust identifier generation.
+**Proven by:** Created `src/utils/audit.test.ts` to simulate a stale/concurrent write by passing the same `expectedRootHash` after another block was appended, ensuring `createAuditLog` correctly throws an OCC error.
+**Other balances to check:** Any other mutable state arrays or balance sums tracking case evidence linkages which might also suffer from similar missing concurrency validations.
