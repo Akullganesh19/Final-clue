@@ -22,14 +22,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies
-      run: pnpm install
+    - name: Install pnpm
+      run: npm install -g pnpm@9
       env:
         npm_config_yes: true
         COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
-
-    - name: Install pnpm
-      run: npm install -g pnpm@9
 
     - name: Install dependencies (with pnpm)
       run: pnpm install
