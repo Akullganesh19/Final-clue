@@ -16,6 +16,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install pnpm
         run: npm install -g pnpm
+      - name: Configure pnpm to disable policies
+        run: echo "minimum-release-age=0" > .npmrc
       - name: Install dependencies
         run: pnpm install
       - name: Lint
