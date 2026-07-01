@@ -16,15 +16,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install pnpm
         run: npm install -g pnpm
-      - name: Configure pnpm to disable policies
-        run: |
-          pnpm config set verify-store-integrity false
-          pnpm config set minimum-release-age 0
-          echo "minimum-release-age=0" > .npmrc
-          echo "verify-store-integrity=false" >> .npmrc
-          echo "ignore-dep-scripts=true" >> .npmrc
-      - name: Clean lockfile and install dependencies
-        run: rm -f pnpm-lock.yaml && pnpm install --no-frozen-lockfile --config.minimum-release-age=0
+      - name: Configure pnpm
+        run: pnpm config set minimum-release-age 0
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --config.minimum-release-age=0
       - name: Lint
         run: pnpm lint
         continue-on-error: true
