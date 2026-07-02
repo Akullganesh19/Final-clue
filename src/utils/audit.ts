@@ -15,10 +15,16 @@ export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
+  expectedParentHash: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+
+  if (expectedParentHash !== previousHash) {
+    throw new Error(`Optimistic Concurrency Control Failed: Expected parent hash ${expectedParentHash} but found ${previousHash}`);
+  }
+
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
