@@ -1,5 +1,14 @@
 import { AuditTrail } from '../types';
 
+export function redactPII(text: string): string {
+  let redacted = text;
+  redacted = redacted.replace(/\b([a-zA-Z0-9])[a-zA-Z0-9._%+-]*(@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g, '$1***$2');
+  redacted = redacted.replace(/\b\d{3}-\d{2}-\d{4}\b/g, 'XXX-XX-XXXX');
+  redacted = redacted.replace(/(?:\(\d{3}\)\s?|\b\d{3}[-.\s])\d{3}[-.\s]\d{4}\b/g, '[REDACTED PHONE]');
+  redacted = redacted.replace(/\b\d{4}[-\s]\d{4}[-\s]\d{4}[-\s]\d{4}\b/g, 'XXXX-XXXX-XXXX-XXXX');
+  return redacted;
+}
+
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
   let hash = 0;
@@ -17,16 +26,18 @@ export function createAuditLog(
   details: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
+  const redactedDetails = redactPII(details);
+
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+  const hash = generateAuditHash(previousHash, action, redactedDetails, author, timestamp);
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp,
     action,
-    details,
+    details: redactedDetails,
     author,
     hash
   };

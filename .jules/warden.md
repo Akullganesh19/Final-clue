@@ -1,0 +1,6 @@
+## 2025-07-02 — [PII Leakage in Audit Logs]
+**Data traced:** [emails, SSNs, phone numbers, credit cards]
+**Exposure found:** [Plaintext storage in audit logs via `createAuditLog`]
+**Fix:** [Added `redactPII` regex mask and applied it structurally to all audit log details before hashing and storage]
+**Coverage confirmed:** [Regex validation via `audit.test.ts`, verified emails, SSNs, phones, CCs are masked while contextual metadata and Snowflake IDs remain intact]
+**Still exposed elsewhere:** [Client-side rendering of older audit logs that might still contain legacy unredacted data, external integrations that might export data not tracked through the audit log system]
