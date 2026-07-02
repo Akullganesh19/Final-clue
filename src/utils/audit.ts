@@ -34,19 +34,27 @@ export function createAuditLog(
   return [...logs, newLog];
 }
 
-// Global scope provides crypto in Node 19+ and modern browsers.
-// Using type assertion to prevent TS2339 errors in Node environments lacking DOM typings.
-const getCrypto = () => {
+// Ensure Web Crypto API is available across environments (browser/Node)
+// Using standard conditional to prevent bundler errors
+const getCrypto = async () => {
   if (typeof globalThis !== 'undefined' && (globalThis as any).crypto) {
     return (globalThis as any).crypto;
+  }
+  // Try to use node crypto if available
+  try {
+     const nodeCrypto = await import('crypto');
+     if (nodeCrypto.webcrypto) {
+         return nodeCrypto.webcrypto;
+     }
+  } catch (e) {
+      // Ignore
   }
   throw new Error("Web Crypto API is not available in this environment. Ensure Node v19+ or a modern browser is used.");
 };
 
 export async function generateAuditHashAsync(previousHash: string, action: string, details: string, author: string, timestamp: string): Promise<string> {
-  const cryptoAPI = getCrypto();
+  const cryptoAPI = await getCrypto();
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
-  // Type assertion for TextEncoder to avoid TS errors
   const encoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : new (globalThis as any).TextEncoder();
   const data = encoder.encode(combined);
   const hashBuffer = await cryptoAPI.subtle.digest('SHA-256', data);
@@ -61,7 +69,7 @@ export async function createAuditLogAsync(
   details: string,
   author: string = "Investigator (Arjun Som)"
 ): Promise<AuditTrail[]> {
-  const cryptoAPI = getCrypto();
+  const cryptoAPI = await getCrypto();
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
