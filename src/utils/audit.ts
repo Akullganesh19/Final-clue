@@ -13,17 +13,23 @@ export function generateAuditHash(previousHash: string, action: string, details:
 
 export function createAuditLog(
   logs: AuditTrail[],
+  expectedParentHash: string,
   action: string,
   details: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
   const lastLog = logs[logs.length - 1];
-  const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+  const actualPreviousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+
+  if (expectedParentHash !== actualPreviousHash) {
+    throw new Error(`OCC Error: expected parent hash ${expectedParentHash} but got ${actualPreviousHash}`);
+  }
+
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+  const hash = generateAuditHash(expectedParentHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
-    id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    id: `AUDIT-${(globalThis as any).crypto.randomUUID()}`,
     timestamp,
     action,
     details,
