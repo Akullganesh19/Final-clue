@@ -1,0 +1,6 @@
+## 2024-07-04 — Migrate audit hashing to Web Crypto API
+**Risk identified:** The previous synchronous hashing implementation used a vulnerable 32-bit integer conversion via bitwise operators to generate hashes. This presents an extremely high collision risk, does not provide cryptographic integrity, and would be rejected by modern compliance standards. PII data logging was also not redacted.
+**Migration target:** The modern Web Crypto API (`crypto.subtle.digest`) which provides hardware-accelerated, robust SHA-256 hashing.
+**Migrated this session:** We built an additive async hash generator (`generateAuditHashAsync`) and an async logging method (`createAuditLogAsync`) that irreversibly redacts PII using regex and generates an audit log. The existing synchronous logs remained untouched to avoid breaking backward compatibility.
+**Remaining:** The rest of the codebase needs to be incrementally migrated to consume the async versions of the audit log creation method, and the synchronous implementation should be fully replaced and removed.
+**Next session:** Identify call sites using the synchronous `createAuditLog` and safely swap them with `await createAuditLogAsync`, moving the application state updates into a non-blocking `Promise` chain.
