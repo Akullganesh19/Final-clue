@@ -1,0 +1,6 @@
+## 2024-07-04 — Resilient API Client with Idempotency and Retries
+**Failure point found:** All external API calls in the app (via standard `fetch()`) were unprotected against transient 5xx errors, had no deduplication for concurrent identical requests, and no idempotency protection for mutations (POST/PUT/DELETE).
+**Why it existed:** The app relied directly on the browser/Node global `fetch()` without a resilient wrapper layer, leading to immediate silent failure on transient issues.
+**Recovery built:** Created `dedupedFetch` and `withRetry` in `src/utils/apiClient.ts` to implement exponential backoff (for 500s), request coalescing for identical in-flight requests (preventing duplicate load), caching for successful GETs, and required idempotency keys for any non-idempotent operation.
+**Blast radius before:** Any server blip caused silent, hard failures for the user. Any rapid clicking caused concurrent, duplicated expensive network traffic. Any failed network request mutating state could easily result in duplicate execution (e.g. creating two cases) if a user retried.
+**Watch for:** Ensure we find any other bare `fetch` calls across the codebase and route them through the `dedupedFetch` layer.
