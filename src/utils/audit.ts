@@ -1,4 +1,5 @@
 import { AuditTrail } from '../types';
+import { globalPredictor } from './oracle';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
@@ -31,5 +32,21 @@ export function createAuditLog(
     hash
   };
 
-  return [...logs, newLog];
+  const updatedLogs = [...logs, newLog];
+
+  // Asynchronously train the Next-Action Prediction engine and trigger prefetch
+  // so it doesn't block the primary audit log creation thread
+  setTimeout(() => {
+    try {
+      globalPredictor.train(updatedLogs);
+      const nextProbableAction = globalPredictor.predictNext(action);
+      if (nextProbableAction) {
+        globalPredictor.triggerPrefetch(nextProbableAction);
+      }
+    } catch (e) {
+      // Fail silently to prevent disrupting the core audit trail functionality
+    }
+  }, 0);
+
+  return updatedLogs;
 }
