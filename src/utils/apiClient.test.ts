@@ -23,7 +23,11 @@ test('apiClient tests', async (t) => {
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
-    mock.timers.reset();
+    try {
+      mock.timers.reset();
+    } catch (e) {
+      // Ignore if timers were not enabled in the test
+    }
   });
 
   await t.test('dedupedFetch request coalescing', async () => {
