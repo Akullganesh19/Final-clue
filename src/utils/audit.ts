@@ -1,4 +1,8 @@
 import { AuditTrail } from '../types';
+import { ActionPredictor } from './oracle';
+
+// Global singleton for Next-Action Prediction engine
+const actionPredictor = new ActionPredictor();
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
@@ -31,5 +35,14 @@ export function createAuditLog(
     hash
   };
 
-  return [...logs, newLog];
+  const updatedLogs = [...logs, newLog];
+
+  // Asynchronously train the predictor and trigger prefetching on the new updated logs
+  // without blocking the main thread execution
+  setTimeout(() => {
+    actionPredictor.train(updatedLogs);
+    actionPredictor.prefetchForAction(action).catch(err => console.error('[Oracle] Error prefetching:', err));
+  }, 0);
+
+  return updatedLogs;
 }
