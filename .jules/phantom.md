@@ -1,0 +1,7 @@
+## 2025-03-01 — Invisible Cache and Coalescing API Client
+**Gap found:** The app directly calls `fetch` naively, leading to identical API calls made multiple times within one page load, no caching on frequently read data, and no request coalescing, causing wasted throughput and user wait times.
+**Why it existed:** Native `fetch` is easy to drop in but doesn't handle component-level duplication or request caching across modern React application renders natively.
+**Built:** Created `dedupedFetch` in `src/utils/apiClient.ts`. It acts as an invisible wrapper that provides request coalescing (using `Response.clone()`) and intelligent caching (with `MAX_CACHE_SIZE = 100` and `CACHE_TTL_MS = 5 * 60 * 1000`), using insertion-order eviction, without polluting the global `fetch` object.
+**Hot path affected:** Any component or utility hitting an API endpoint natively will benefit instantly by swapping `fetch` with `dedupedFetch`, smoothing out UI rendering and reducing loading spinners.
+**Measurable improvement:** Redundant simultaneous API requests to the same URL are fully eliminated (saving network requests), and repeated requests within 5 minutes return instantly from memory.
+**Next opportunity:** Background Sync for non-critical writes (e.g. queueing and retrying POST requests) or a Stale-While-Revalidate caching pattern for the `dedupedFetch` layer.
