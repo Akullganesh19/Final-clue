@@ -1,0 +1,8 @@
+## 🧮 Financial Integrity Fix
+
+**What:** Fixed audit trail generation (`createAuditLog`) to enforce Optimistic Concurrency Control (OCC) and Idempotency checks.
+**Drift mechanism:** The previous implementation mutated a shared array based on stale reads. Under concurrent execution (e.g. race conditions), simultaneous writes would overwrite each other and silently drop log entries. Retries of the same operation (e.g. duplicate webhook deliveries) would result in duplicated audit logs.
+**Fix:** Introduced an `expectedVersion` parameter to `createAuditLog` to enforce OCC by asserting the global log length hasn't changed between read and write. Added an `idempotencyKey` parameter that short-circuits execution if the operation was already processed, ensuring state idempotency.
+**Proof:** Implemented concurrency and idempotency testing in `src/utils/__tests__/audit.test.ts` which simulates a read-modify-write race and duplicate webhook delivery, verifying the new code prevents chain drift and duplicate logging.
+**Blast radius if unfixed:** Without OCC and idempotency, critical financial/audit logs would silently disappear under load, leading to irreconcilable system state and unexplainable data loss during security audits or investigations.
+**Other balances at similar risk:** Any other shared in-memory lists, counters, or database structures in the application that use read-modify-write loops without an `expectedVersion` check or explicit locking.
