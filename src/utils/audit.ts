@@ -1,7 +1,15 @@
 import { AuditTrail } from '../types';
 
+export function redactPII(text: string): string {
+  return text
+    .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[REDACTED EMAIL]')
+    .replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[REDACTED SSN]')
+    .replace(/(?:\b|\()\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}\b/g, '[REDACTED PHONE]')
+    .replace(/\b(?:\d[ -]*?){13,16}\b/g, '[REDACTED CARD]');
+}
+
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
-  const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+  const combined = [previousHash, action, details, author, timestamp].map(s => s.replace(/\|/g, '\\|')).join('|');
   let hash = 0;
   for (let i = 0; i < combined.length; i++) {
     const char = combined.charCodeAt(i);
@@ -20,13 +28,14 @@ export function createAuditLog(
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+  const redactedDetails = redactPII(details);
+  const hash = generateAuditHash(previousHash, action, redactedDetails, author, timestamp);
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp,
     action,
-    details,
+    details: redactedDetails,
     author,
     hash
   };
