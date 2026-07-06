@@ -1,0 +1,6 @@
+## 2024-05-18 — Serial Pattern Clustering
+**Product understood as:** A multi-agent cold case triage system that identifies pairwise semantic and MO linkages between individual cases.
+**Derivation reasoning:** We have individual cases and we compute pairwise linkages between them. However, serial offenders don't just commit two crimes; they commit a series. We have a graph of linkages, but we don't group them into macro-patterns. Investigators need to see the "cluster" (the series) as a single entity, rather than just disjoint pairs.
+**Feature built:** Added `findCaseClusters` in `src/utils/clustering.ts` that traverses the linkage graph to group connected cases into `CaseCluster` patterns, automatically deriving the common MO and overall confidence.
+**User impact:** Users can now view interconnected cases as a single serial pattern with aggregated confidence and shared MOs, reducing cognitive load when tracking serial offenders.
+**Next logical feature:** Add a chronological timeline visualization for these newly derived clusters.
