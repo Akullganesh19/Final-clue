@@ -6,7 +6,7 @@ import { AuditTrail } from '../types';
 test('generateAuditHashAsync should return a formatted hash string', async () => {
   const hash = await generateAuditHashAsync('prev', 'CREATE', 'details', 'author', '2023-01-01');
   assert.ok(hash.startsWith('CHK-'));
-  assert.strictEqual(hash.length, 12); // 'CHK-' + 8 chars
+  assert.strictEqual(hash.length, 68); // 'CHK-' + 64 chars
 });
 
 test('createAuditLogAsync should create a new audit log', async () => {

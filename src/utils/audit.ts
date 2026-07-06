@@ -40,7 +40,7 @@ export async function generateAuditHashAsync(previousHash: string, action: strin
   const hashBuffer = await (globalThis as any).crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return 'CHK-' + hashHex.substring(0, 8).toUpperCase();
+  return 'CHK-' + hashHex.toUpperCase();
 }
 
 export async function createAuditLogAsync(
