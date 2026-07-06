@@ -1,4 +1,5 @@
 import { AuditTrail } from '../types';
+import { actionPredictor } from './oracle';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
@@ -31,5 +32,13 @@ export function createAuditLog(
     hash
   };
 
-  return [...logs, newLog];
+  const newLogs = [...logs, newLog];
+
+  // Asynchronously train the predictive model and prefetch the next logical action
+  setTimeout(() => {
+    actionPredictor.train(newLogs);
+    actionPredictor.predictAndPrefetch(action);
+  }, 0);
+
+  return newLogs;
 }
