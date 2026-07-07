@@ -33,3 +33,39 @@ export function createAuditLog(
 
   return [...logs, newLog];
 }
+
+export async function generateAuditHashAsync(previousHash: string, action: string, details: string, author: string, timestamp: string): Promise<string> {
+  const combined = JSON.stringify([previousHash, action, details, author, timestamp]);
+
+  const encoder = new ((globalThis as any).TextEncoder)();
+  const data = encoder.encode(combined);
+
+  const hashBuffer = await (globalThis as any).crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  return hashHex;
+}
+
+export async function createAuditLogAsync(
+  logs: AuditTrail[],
+  action: string,
+  details: string,
+  author: string = "Investigator (Arjun Som)"
+): Promise<AuditTrail[]> {
+  const lastLog = logs[logs.length - 1];
+  const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+  const timestamp = new Date().toISOString();
+  const hash = await generateAuditHashAsync(previousHash, action, details, author, timestamp);
+
+  const newLog: AuditTrail = {
+    id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    timestamp,
+    action,
+    details,
+    author,
+    hash
+  };
+
+  return [...logs, newLog];
+}
