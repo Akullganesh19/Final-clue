@@ -35,4 +35,4 @@ jobs:
       continue-on-error: true
 
     - name: Test
-      run: pnpm test
+      run: npx tsx --test "src/**/*.test.ts"
