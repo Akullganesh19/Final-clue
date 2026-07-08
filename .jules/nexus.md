@@ -1,0 +1,6 @@
+## 2026-07-07 — Serial Pattern Clustering
+**Product understood as:** A multi-agent case-linkage and evidence-triage system for cold cases.
+**Derivation reasoning:** This product has Cases and pairwise Linkages (A-B). Users view case similarities to identify connections. Therefore, users obviously need Serial Pattern Clustering — because investigators aren't just looking for two similar cases; they are looking for macro patterns (A connected to B, which is connected to C) indicating a serial offender. It doesn't exist because the system historically focused on pairwise semantic similarity and network visualizations without extracting the macro groups. I'm building it because grouping pairwise links into high-confidence clusters immediately provides investigators with actionable serial case files.
+**Feature built:** Graph traversal algorithm (`findCaseClusters`) in `src/utils/clustering.ts` that uses breadth-first search to connect pairwise linkages into macro patterns (`CaseCluster`), computing average confidence and primary MO/Locations.
+**User impact:** Users can now view and analyze unified "clusters" of serial activity spanning multiple connected cases rather than analyzing pairwise links in isolation.
+**Next logical feature:** Cluster Timeline View — plotting the clustered cases on a timeline to show the temporal progression of a serial pattern.
