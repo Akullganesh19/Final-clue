@@ -10,7 +10,8 @@ test('dedupedFetch - coalesces concurrent identical requests', async (t) => {
     return new Response(url);
   }) as any;
 
-  const { dedupedFetch } = await import('./apiClient.ts?1');
+  // @ts-ignore
+  const { dedupedFetch } = await import('./apiClient.ts?1') as any;
 
   const url = 'https://api.example.com/data';
 
@@ -33,7 +34,8 @@ test('dedupedFetch - bypasses cache for POST requests', async (t) => {
     return new Response(url + init.method);
   }) as any;
 
-  const { dedupedFetch } = await import('./apiClient.ts?2');
+  // @ts-ignore
+  const { dedupedFetch } = await import('./apiClient.ts?2') as any;
 
   const url = 'https://api.example.com/data';
   const init = { method: 'POST' };
@@ -56,7 +58,8 @@ test('dedupedFetch - caches successful GET requests', async (t) => {
     return new Response(url);
   }) as any;
 
-  const { dedupedFetch } = await import('./apiClient.ts?3');
+  // @ts-ignore
+  const { dedupedFetch } = await import('./apiClient.ts?3') as any;
 
   const url = 'https://api.example.com/data-cache';
 
