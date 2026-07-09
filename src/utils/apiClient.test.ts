@@ -24,7 +24,7 @@ if (!(globalThis as any).crypto) {
 }
 
 test('apiClient with retry and idempotency', async (t) => {
-  mock.timers.enable({ apis: ['setTimeout'] });
+  try { mock.timers.enable({ apis: ['setTimeout'] }); } catch { mock.timers.enable(['setTimeout'] as any); }
 
   let fetchCalls = 0;
   globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
