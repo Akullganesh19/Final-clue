@@ -1,3 +1,6 @@
+import { setupGlobalFetchInterceptor } from './utils/apiClient';
+setupGlobalFetchInterceptor();
+
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
