@@ -37,6 +37,7 @@ test('apiClient with retry and idempotency', async (t) => {
 
   // Clear cache and dynamically import
   // Require cache clearing not easily available in ESM, we append a query string.
+  // @ts-ignore
   const { dedupedFetch } = await import('./apiClient.ts?1');
 
   await t.test('prevents duplicate POST requests within TTL', async () => {
