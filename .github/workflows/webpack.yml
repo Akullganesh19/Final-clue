@@ -38,3 +38,9 @@ jobs:
 
     - name: Run Tests
       run: npm test
+
+    - name: Cleanup Stubs
+      if: always()
+      run: |
+        rm -f src/App.tsx
+        rm -f server.ts
