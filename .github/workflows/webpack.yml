@@ -34,4 +34,4 @@ jobs:
       continue-on-error: true
 
     - name: Test
-      run: npx tsx --test "src/**/*.test.ts"
+      run: npx tsx --test src/**/*.test.ts
