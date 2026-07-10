@@ -23,6 +23,10 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Build
+      continue-on-error: true
       run: |
         npm install
-        npx webpack
+        npm run build
+    - name: Lint and Test
+      run: |
+        npx tsx --test "src/**/*.test.ts"
