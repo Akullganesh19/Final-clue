@@ -1,4 +1,5 @@
 import { AuditTrail } from '../types';
+import { globalPredictor } from './ActionPredictor';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
@@ -31,5 +32,16 @@ export function createAuditLog(
     hash
   };
 
-  return [...logs, newLog];
+  const newLogs = [...logs, newLog];
+
+  // Passively train the global predictor and trigger any relevant background prefetching
+  // based on this new audited action without creating circular main.tsx dependencies
+  try {
+    globalPredictor.train(newLogs);
+    globalPredictor.prefetchNext(action);
+  } catch (e) {
+    // Fail silently to prevent disrupting core audit flow
+  }
+
+  return newLogs;
 }
