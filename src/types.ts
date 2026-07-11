@@ -53,6 +53,7 @@ export interface AuditTrail {
   details: string;
   author: string;
   hash: string;
+  idempotencyKey?: string;
 }
 
 export interface SystemWeights {
