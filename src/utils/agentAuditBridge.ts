@@ -9,6 +9,7 @@ let globalAuditLogs: AuditTrail[] = [];
 export function setupAgentAuditBridge() {
   eventBus.on('agent.action', (agentLog: AgentLog) => {
     if (agentLog.type === 'action') {
+      console.log(`Bridge fired for agent: ${agentLog.agent}`);
       const details = `Agent ${agentLog.agent} performed action: ${agentLog.message}`;
       globalAuditLogs = createAuditLog(
         globalAuditLogs,
