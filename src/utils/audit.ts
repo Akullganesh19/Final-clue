@@ -15,8 +15,14 @@ export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
-  author: string = "Investigator (Arjun Som)"
+  author: string = "Investigator (Arjun Som)",
+  idempotencyKey?: string
 ): AuditTrail[] {
+  if (idempotencyKey && logs.some(log => log.idempotencyKey === idempotencyKey)) {
+    console.warn(`[Genesis Recovery] Idempotency guard fired: Suppressed duplicate audit log for key "${idempotencyKey}" (Action: ${action})`);
+    return logs; // Idempotency guard: return unmodified reference if key exists
+  }
+
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
@@ -28,7 +34,8 @@ export function createAuditLog(
     action,
     details,
     author,
-    hash
+    hash,
+    idempotencyKey
   };
 
   return [...logs, newLog];
