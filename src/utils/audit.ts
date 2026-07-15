@@ -33,3 +33,34 @@ export function createAuditLog(
 
   return [...logs, newLog];
 }
+
+export function verifyAuditTrail(logs: AuditTrail[]): boolean {
+  if (logs.length === 0) return true;
+
+  for (let i = 0; i < logs.length; i++) {
+    const currentLog = logs[i];
+    const previousHash = i === 0 ? 'CHK-ROOT-GENESIS-CHAIN-STABLE' : logs[i - 1].hash;
+
+    const expectedHash = generateAuditHash(
+      previousHash,
+      currentLog.action,
+      currentLog.details,
+      currentLog.author,
+      currentLog.timestamp
+    );
+
+    if (currentLog.hash !== expectedHash) {
+      return false; // Tampering detected
+    }
+  }
+
+  return true; // Chain is intact
+}
+
+export function exportAuditTrailToCSV(logs: AuditTrail[]): string {
+  const headers = "Timestamp,Action,Details,Author,Hash\n";
+  const rows = logs.map(l =>
+    `"${l.timestamp}","${l.action.replace(/"/g, '""')}","${l.details.replace(/"/g, '""')}","${l.author.replace(/"/g, '""')}","${l.hash}"`
+  ).join("\n");
+  return headers + rows;
+}
