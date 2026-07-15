@@ -1,4 +1,7 @@
 import { AuditTrail } from '../types';
+import { NextActionPredictor } from './predictor';
+
+export const globalPredictor = new NextActionPredictor();
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
@@ -31,5 +34,13 @@ export function createAuditLog(
     hash
   };
 
-  return [...logs, newLog];
+  const newLogs = [...logs, newLog];
+
+  // Train the predictor with the updated sequence
+  globalPredictor.train(newLogs);
+
+  // Predict the user's next action and log prefetch intent
+  globalPredictor.predict(action);
+
+  return newLogs;
 }
