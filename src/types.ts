@@ -48,6 +48,7 @@ export interface AgentLog {
 
 export interface AuditTrail {
   id: string;
+  idempotencyKey: string;
   timestamp: string;
   action: string;
   details: string;
