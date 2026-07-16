@@ -25,7 +25,7 @@ describe('Audit Utility', () => {
   });
 
   it('should successfully create an audit log with redacted PII in action and details', () => {
-    const logs = createAuditLog([], "Logged by john.doe@example.com", "Details include SSN: 123-45-6789 and phone: (555) 123-4567");
+    const logs = createAuditLog([], "Logged by john.doe@example.com", "Details include SSN: 123-45-6789 and phone: (555) 123-4567", "Test Author");
 
     assert.strictEqual(logs.length, 1);
     assert.strictEqual(logs[0].action, "Logged by j***@example.com");
