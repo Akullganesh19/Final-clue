@@ -3,6 +3,7 @@ export class NextActionPredictor {
   private transitions: Record<string, Record<string, number>> = {};
   public currentPrediction: string | null = null;
 
+  // Trains the Markov chain by observing the transition from the last action to the current one
   train(action: string) {
     if (this.lastAction !== null) {
       if (!this.transitions[this.lastAction]) {
@@ -14,6 +15,7 @@ export class NextActionPredictor {
     this.predict(action);
   }
 
+  // Predicts the most likely next action based on historical transition frequencies from the current action
   predict(currentAction: string): string | null {
     const nextActions = this.transitions[currentAction];
     if (!nextActions) {
