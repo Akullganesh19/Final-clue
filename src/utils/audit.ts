@@ -20,13 +20,17 @@ export function createAuditLog(
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+
+  // Redact PII (phone numbers) from details
+  const redactedDetails = details.replace(/(?<=^|[^\d])\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}(?=$|[^\d])/g, '[REDACTED]');
+
+  const hash = generateAuditHash(previousHash, action, redactedDetails, author, timestamp);
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp,
     action,
-    details,
+    details: redactedDetails,
     author,
     hash
   };
