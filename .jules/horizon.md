@@ -1,0 +1,6 @@
+## 2025-03-09 — Web Crypto API Migration & Native Testing Setup
+**Risk identified:** Vulnerable custom 32-bit bitwise hashing function prone to collisions and delimiter injection, coupled with an unsupported CI testing pipeline lacking native test runners and running outdated Node.js versions.
+**Migration target:** Native Web Crypto API `crypto.subtle.digest` with robust JSON serialization for hashing; native `node:test` runner using `tsx` for tests; modern CI GitHub actions.
+**Migrated this session:** Introduced `generateAuditHashAsync` utilizing the Web Crypto API to provide an additive migration path. Retained the original synchronous `generateAuditHash` and `createAuditLog` to prevent breaking existing callers. Added native tests and updated GitHub Actions CI to remove Node 18 and include testing.
+**Remaining:** Refactor consumers of `createAuditLog` and `generateAuditHash` to support Promise-based asynchronous event ingestion, followed by completely removing the synchronous bitwise fallback once all callers are migrated.
+**Next session:** Hunt for usages of `createAuditLog` and begin refactoring callers to await asynchronous operations, enabling the eventual deprecation and removal of the legacy hashing mechanism.
