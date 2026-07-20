@@ -1,4 +1,5 @@
 import { AuditTrail } from '../types';
+import { globalPredictor } from './predictor';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
@@ -30,6 +31,12 @@ export function createAuditLog(
     author,
     hash
   };
+
+  globalPredictor.train(action);
+  const prediction = globalPredictor.predict(action);
+  if (prediction) {
+    console.log(`[Oracle] Anticipating next action: ${prediction}`);
+  }
 
   return [...logs, newLog];
 }
