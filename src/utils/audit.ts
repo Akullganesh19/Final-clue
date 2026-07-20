@@ -1,7 +1,7 @@
 import { AuditTrail } from '../types';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
-  const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+  const combined = JSON.stringify([previousHash, action, details, author, timestamp]);
   let hash = 0;
   for (let i = 0; i < combined.length; i++) {
     const char = combined.charCodeAt(i);
@@ -23,7 +23,7 @@ export function createAuditLog(
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
-    id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    id: `AUDIT-${crypto.randomUUID()}`,
     timestamp,
     action,
     details,
