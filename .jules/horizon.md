@@ -1,0 +1,6 @@
+## 2024-07-21 — Migrate Audit Hashing to Web Crypto API and UUIDs
+**Risk identified:** The previous synchronous hashing approach (`generateAuditHash`) relied on a custom 32-bit integer algorithm vulnerable to collision, and used predictable `Date.now() + Math.random()` for Unique ID generation. Both are highly problematic for security-sensitive audit logging over time. Additionally, simple string concatenation using `|` was prone to delimiter injection.
+**Migration target:** Modern, secure hashing leveraging `crypto.subtle.digest('SHA-256')` (Web Crypto API) and `crypto.randomUUID()` for unique identifiers. The migration includes serializing input parameters via `JSON.stringify` to guarantee secure boundary preservation.
+**Migrated this session:** Added the `generateAuditHashAsync` and `createAuditLogAsync` additive parallel functions in `src/utils/audit.ts`. Existing synchronous approaches remain untouched to prevent regressions in call sites.
+**Remaining:** All active call sites making synchronous calls to `createAuditLog` and `generateAuditHash` must be individually migrated to the new asynchronous API equivalents over subsequent sessions.
+**Next session:** Start tracking the callers of `createAuditLog` in components/utils and begin swapping them to async boundaries to eventually remove the legacy logic.
