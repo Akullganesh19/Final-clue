@@ -1,5 +1,27 @@
 import { AuditTrail } from '../types';
 
+export function redactSensitiveData(text: string): string {
+  if (!text) return text;
+
+  let redacted = text;
+
+  // Email
+  redacted = redacted.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED EMAIL]');
+
+  // Phone numbers (various formats)
+  // Lookbehind (?<=^|[^\d]) ensures we don't start matching inside another number
+  redacted = redacted.replace(/(?<=^|[^\d])(?:\+?\d{1,3}[-. ]?)?\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}(?!\d)/g, '[REDACTED PHONE]');
+
+  // SSN (###-##-####)
+  redacted = redacted.replace(/(?<=^|[^\d])\d{3}-\d{2}-\d{4}(?!\d)/g, '[REDACTED SSN]');
+
+  // Credit Cards (16 digits with optional dashes/spaces)
+  redacted = redacted.replace(/(?<=^|[^\d])(?:\d{4}[- ]){3}\d{4}(?!\d)/g, '[REDACTED CC]');
+
+  return redacted;
+}
+
+
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
   let hash = 0;
@@ -20,13 +42,14 @@ export function createAuditLog(
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+  const redactedDetails = redactSensitiveData(details);
+  const hash = generateAuditHash(previousHash, action, redactedDetails, author, timestamp);
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp,
     action,
-    details,
+    details: redactedDetails,
     author,
     hash
   };
