@@ -17,7 +17,7 @@ test('coalesces multiple concurrent GET requests without AbortSignal', async () 
     res.end('ok');
   });
 
-  await new Promise(resolve => server.listen(0, resolve));
+  await new Promise<void>(resolve => server.listen(0, () => resolve()));
   const port = (server.address() as any).port;
 
   const p1 = fetch(`http://localhost:${port}/api/data`);
@@ -39,7 +39,7 @@ test('does not coalesce requests with AbortSignal', async () => {
     res.end('ok');
   });
 
-  await new Promise(resolve => server.listen(0, resolve));
+  await new Promise<void>(resolve => server.listen(0, () => resolve()));
   const port = (server.address() as any).port;
 
   const controller = new AbortController();
