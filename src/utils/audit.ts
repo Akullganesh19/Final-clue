@@ -1,5 +1,14 @@
 import { AuditTrail } from '../types';
 
+
+export function redactPII(text: string): string {
+  if (!text) return text;
+  let redacted = text.replace(/([a-zA-Z0-9._%+-])(?:[a-zA-Z0-9._%+-]*)(@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '$1***$2');
+  redacted = redacted.replace(/(?<=^|[^\d])\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?(\d{4})(?=$|[^\d])/g, '***-***-$1');
+  redacted = redacted.replace(/(?<=^|[^\d])\d{3}[-.\s]?\d{2}[-.\s]?(\d{4})(?=$|[^\d])/g, '***-**-$1');
+  return redacted;
+}
+
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
   let hash = 0;
@@ -17,6 +26,9 @@ export function createAuditLog(
   details: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
+  action = redactPII(action);
+  details = redactPII(details);
+  author = redactPII(author);
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
