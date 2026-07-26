@@ -27,4 +27,4 @@ jobs:
         npm install
         npm run build
         npm run lint
-        npx tsx --test "src/**/*.test.ts"
+        npx tsx --test src/**/*.test.ts
