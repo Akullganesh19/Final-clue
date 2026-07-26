@@ -11,6 +11,17 @@ export function generateAuditHash(previousHash: string, action: string, details:
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
 
+
+export async function generateAuditHashAsync(previousHash: string, action: string, details: string, author: string, timestamp: string): Promise<string> {
+  const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+  const encoder = new TextEncoder();
+  const data = encoder.encode(combined);
+  const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  return 'CHK-' + hashHex.substring(0, 8); // Keep 8 chars for compatibility
+}
+
 export function createAuditLog(
   logs: AuditTrail[],
   action: string,
@@ -23,7 +34,7 @@ export function createAuditLog(
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
-    id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    id: `AUDIT-${globalThis.crypto.randomUUID()}`,
     timestamp,
     action,
     details,
