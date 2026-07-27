@@ -14,11 +14,11 @@ test('id generation should not collide in tight loops', () => {
 
     // We conditionally mock it only if it doesn't exist, though Vite browser environments will have it.
     if (!globalThis.crypto) {
-        globalThis.crypto = { randomUUID: () => 'uuid-' + Math.random() } as any;
+        globalThis.crypto = { randomUUID: () => "uuid-" + Math.random().toString(36) } as any;
     }
 
     for (let i = 0; i < 5000; i++) {
-        const logs = createAuditLog([], 'ACTION', 'DETAILS');
+        const logs = createAuditLog([], "ACTION", "DETAILS", "TEST_AUTHOR");
         const id = logs[0].id;
         if (ids.has(id)) {
             collisions.push(id);
