@@ -23,7 +23,7 @@ export function createAuditLog(
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
-    id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    id: `AUDIT-${globalThis.crypto.randomUUID()}`,
     timestamp,
     action,
     details,
