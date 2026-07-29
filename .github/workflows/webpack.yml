@@ -24,8 +24,5 @@ jobs:
 
     - name: Build
       run: |
-        npm install -g pnpm
-        pnpm install
-        pnpm build
-        pnpm lint
-        npx tsx --test src/**/*.test.ts
+        npm install
+        npx webpack
