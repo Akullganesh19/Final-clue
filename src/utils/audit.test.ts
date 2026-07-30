@@ -10,7 +10,7 @@ test('Audit logs generate unique IDs under high concurrency', () => {
 
     // Simulate high concurrency generation within the same ms by mocking Date.now
     const originalDateNow = Date.now;
-    global.Date.now = () => 1629880000000;
+    Date.now = () => 1629880000000;
 
     try {
         for (let i = 0; i < 1000; i++) {
@@ -24,6 +24,6 @@ test('Audit logs generate unique IDs under high concurrency', () => {
 
         assert.strictEqual(collisions, 0, `Expected 0 collisions, but found ${collisions}`);
     } finally {
-        global.Date.now = originalDateNow;
+        Date.now = originalDateNow;
     }
 });
