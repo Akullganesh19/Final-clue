@@ -40,7 +40,8 @@ export function createAuditLog(
     action,
     details,
     author,
-    hash
+    hash,
+    hashVersion: 2
   };
 
   return [...logs, newLog];
