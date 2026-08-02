@@ -53,7 +53,6 @@ export interface AuditTrail {
   details: string;
   author: string;
   hash: string;
-  hashVersion?: number;
 }
 
 export interface SystemWeights {
