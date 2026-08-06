@@ -1,0 +1,6 @@
+## 2025-03-05 — Cryptographic Hash Migration
+**Risk identified:** The legacy audit hash generation uses an insecure 32-bit integer custom hashing algorithm and naive string concatenation, which is prone to collisions and delimiter injection, aging badly over the next years as security standards tighten.
+**Migration target:** Modern secure asynchronous `crypto.subtle.digest('SHA-256')` and structured `JSON.stringify` serialization, with explicit schema versioning (`hashVersion: 2`).
+**Migrated this session:** Preserved legacy `generateAuditHash` for validation of old chains, introduced `generateAuditHashV2` and updated the `AuditTrail` interface with `hashVersion`. Following the reader-first migration strategy, `generateAuditHashV2` is currently not integrated into `createAuditLog` to ensure consumers do not receive asynchronous payloads before being updated.
+**Remaining:** Integrating `generateAuditHashV2` into `createAuditLog` and updating downstream consumers or UI visualization to support both version 1 and 2 hashes.
+**Next session:** Implementing backward-compatible hash verification logic in downstream chain validation systems as they are built, and converting `createAuditLog` to support async hash generation natively or building an additive `createAuditLogV2`.
