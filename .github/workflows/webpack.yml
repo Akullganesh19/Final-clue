@@ -25,5 +25,6 @@ jobs:
     - name: Build
       run: |
         npm install -g pnpm
+        pnpm config set ignore-scripts true
         pnpm install
         pnpm run build || true
