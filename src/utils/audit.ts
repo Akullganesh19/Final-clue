@@ -10,6 +10,16 @@ export function generateAuditHash(previousHash: string, action: string, details:
   }
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
+export function generateAuditHashV2(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
+  const data = JSON.stringify({ previousHash, action, details, author, timestamp });
+  let hash = 2166136261;
+  for (let i = 0; i < data.length; i++) {
+    hash ^= data.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return 'CHK-V2-' + (hash >>> 0).toString(16).toUpperCase().padStart(8, '0');
+}
+
 
 export function createAuditLog(
   logs: AuditTrail[],
@@ -20,7 +30,7 @@ export function createAuditLog(
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+  const hash = generateAuditHashV2(previousHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -28,7 +38,8 @@ export function createAuditLog(
     action,
     details,
     author,
-    hash
+    hash,
+    hashVersion: 2
   };
 
   return [...logs, newLog];
