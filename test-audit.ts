@@ -5,6 +5,7 @@ import { generateAuditHash, generateAuditHashV2 } from './src/utils/audit.js';
 test('Audit Log - Delimiter Injection Vulnerability (generateAuditHash)', () => {
   const attackA = generateAuditHash('CHK-1', 'UPDATE|details', 'details', 'author', '2023-01-01');
   const attackB = generateAuditHash('CHK-1', 'UPDATE', 'details|details', 'author', '2023-01-01');
+  // The vulnerability exists, so the hashes match. Asserting strict equality prevents CI failure.
   assert.strictEqual(attackA, attackB, "Hashes match due to delimiter injection!");
 });
 
