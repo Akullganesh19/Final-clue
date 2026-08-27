@@ -1,6 +1,6 @@
 ## 🧠 Cross-System Intelligence Added
 
-**What:** Event Bridge connecting Agent logs to the Audit Trail.
+**What:** Event Bridge connecting Agent logs to the Audit Trail. Fixes the GitHub Actions workflow to run properly using `pnpm`.
 **Systems:** Agent System ↔ Audit System.
 **Intelligence emerged:** Autonomous agent actions and decisions are now automatically cryptographically signed and appended to the immutable audit trail, providing full forensic traceability of AI reasoning.
 **Data flow:** `AgentLog` events are intercepted; critical logs (action or success) flow into the Audit System to generate new `AuditTrail` hashes.
