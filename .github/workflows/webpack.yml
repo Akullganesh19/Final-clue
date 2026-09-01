@@ -1,4 +1,4 @@
-name: CI
+name: NodeJS with Webpack
 
 on:
   push:
@@ -25,4 +25,4 @@ jobs:
     - name: Build
       run: |
         npm install
-        npm run build
+        npm test
