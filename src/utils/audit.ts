@@ -1,7 +1,18 @@
 import { AuditTrail } from '../types';
 
-export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
+export function generateAuditHash_legacy(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+  let hash = 0;
+  for (let i = 0; i < combined.length; i++) {
+    const char = combined.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+}
+
+export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
+  const combined = JSON.stringify([previousHash, action, details, author, timestamp]);
   let hash = 0;
   for (let i = 0; i < combined.length; i++) {
     const char = combined.charCodeAt(i);
