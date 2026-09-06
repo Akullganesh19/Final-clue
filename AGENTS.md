@@ -336,5 +336,3 @@ Re-read the entry cold: would someone who didn't write the code understand what 
 Title: `📣 Herald: [change now documented]`
 
 ---
-
-Still curious what you meant by "enhance the prompt to ___" for Oracle — let me know and I'll fold it in.
