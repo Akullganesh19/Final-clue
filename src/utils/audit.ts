@@ -1,5 +1,26 @@
 import { AuditTrail } from '../types';
 
+function redactPII(text: string): string {
+  let redacted = text;
+
+  // Redact email
+  redacted = redacted.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, match => {
+    const parts = match.split('@');
+    return `${parts[0][0]}***@${parts[1]}`;
+  });
+
+  // Redact SSN
+  redacted = redacted.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '***-**-****');
+
+  // Redact phone number (various formats)
+  redacted = redacted.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, match => {
+    return '***-***-' + match.slice(-4);
+  });
+
+  return redacted;
+}
+
+
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
   let hash = 0;
@@ -26,7 +47,7 @@ export function createAuditLog(
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp,
     action,
-    details,
+    details: redactPII(details),
     author,
     hash
   };
