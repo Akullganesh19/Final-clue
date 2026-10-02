@@ -1,0 +1,6 @@
+## 2025-03-05 — [Audit Trail OCC & Delimiter Injection]
+**Value type:** Audit Trail Hash Chain
+**Drift risk found:** Read-modify-write race condition allowed concurrent operations reading the same state to branch off the same `previousHash`, causing a silent fork/drift in the immutable audit chain. Additionally, a delimiter injection vulnerability existed where string concatenation using `|` could yield the same hash for different values.
+**Fix:** Added an `expectedPreviousHash` Optimistic Concurrency Control (OCC) check to `createAuditLog` to throw `AuditChainConflictError` on drift, and replaced string concatenation with `JSON.stringify` array serialization for safe hashing.
+**Proven by:** The concurrency/retry test `src/utils/audit.test.ts` simulates the exact drift scenario, verifying that concurrent operations correctly throw rather than corrupting the hash chain. It also confirms distinct hashes for different strings containing `|`.
+**Other balances to check:** Check for similar logging mechanisms or retry scenarios where `fetch` caches or webhook events aren't protected by idempotency checks.
