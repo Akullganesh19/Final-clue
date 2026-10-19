@@ -1,4 +1,5 @@
 import { AuditTrail } from '../types';
+import { actionPredictor } from './ActionPredictor';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
@@ -30,6 +31,9 @@ export function createAuditLog(
     author,
     hash
   };
+
+  // Oracle: Predict next likely action based on this action
+  actionPredictor.trackAction(action);
 
   return [...logs, newLog];
 }
