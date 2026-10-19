@@ -61,3 +61,11 @@ export interface SystemWeights {
   temporal: number; // e.g. 0.2
   mo: number;       // e.g. 0.2
 }
+
+export interface CaseCluster {
+  id: string;
+  cases: Case[];
+  coreMoCategories: string[]; // Modus operandi categories common among clustered cases
+  commonLocations: string[]; // Locations common among clustered cases
+  confidenceScore: number; // Average confidence of the linkages
+}
