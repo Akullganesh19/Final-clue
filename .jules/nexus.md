@@ -1,0 +1,6 @@
+## 2025-06-23 — Case Linkage CSV Export
+**Product understood as:** A multi-agent cold case system that intelligently links cases and provides evidence triage.
+**Derivation reasoning:** This product has `Linkage` data. Users do investigations resulting in a status of 'confirmed' or 'pending'. Therefore users obviously need a way to export these confirmed linkages — because investigators and analysts frequently need to share findings via standard formats like CSV for external reporting or database ingestion. It doesn't exist because the initial focus was on the internal intelligent linkage mechanism rather than data portability. I'm building it because it unlocks the ability for investigators to bring insights out of the tool and into their official workflows.
+**Feature built:** An export endpoint (`/api/export/linkages/csv`) that filters confirmed linkages and exports them as a CSV, and an integration in the frontend to trigger this export.
+**User impact:** Users can now extract confirmed case linkages in a structured CSV format with a single click, enabling them to share this critical data with external agencies and systems.
+**Next logical feature:** An import feature or webhook to ingest external case updates directly into the linkage database to close the loop on external investigations.
