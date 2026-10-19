@@ -15,15 +15,21 @@ export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
+  expectedParentHash: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+
+  if (expectedParentHash !== previousHash) {
+    throw new Error(`Optimistic Concurrency Control failure: expected parent hash ${expectedParentHash} but found ${previousHash}. The audit trail was modified concurrently.`);
+  }
+
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
-    id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    id: `AUDIT-${(globalThis as any).crypto.randomUUID()}`,
     timestamp,
     action,
     details,
