@@ -1,3 +1,4 @@
+import { actionPredictor } from './predictor';
 import { AuditTrail } from '../types';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
@@ -30,6 +31,8 @@ export function createAuditLog(
     author,
     hash
   };
+
+  actionPredictor.train(action);
 
   return [...logs, newLog];
 }
