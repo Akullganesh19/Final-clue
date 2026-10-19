@@ -11,6 +11,17 @@ export function generateAuditHash(previousHash: string, action: string, details:
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
 
+
+export async function generateAuditHashV2(previousHash: string, action: string, details: string, author: string, timestamp: string): Promise<string> {
+  const data = JSON.stringify({ previousHash, action, details, author, timestamp });
+  const encoder = new TextEncoder();
+  const buffer = encoder.encode(data);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return 'CHK-V2-' + hashHex;
+}
+
 export function createAuditLog(
   logs: AuditTrail[],
   action: string,
