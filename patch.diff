@@ -1,0 +1,11 @@
+--- src/utils/fetch.ts
++++ src/utils/fetch.ts
+@@ -64,7 +64,7 @@
+
+   if (cached) {
+     const isStale = Date.now() - cached.timestamp > CACHE_TTL;
+-    if (isStale) {
++    if (isStale && !inFlight.has(cacheKey)) {
+       // Background revalidate
+       fetchAndCache(input, effectiveInit, cacheKey).catch(e => {
+         console.warn('Background revalidation failed:', e);
