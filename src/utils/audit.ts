@@ -11,6 +11,30 @@ export function generateAuditHash(previousHash: string, action: string, details:
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
 
+
+function redactPII(text: string): string {
+  if (!text) return text;
+
+  // Mask Email (keep first character and domain)
+  text = text.replace(/([a-zA-Z0-9])([a-zA-Z0-9._%+-]*)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, (match, p1, p2, p3) => {
+    return p1 + '***@' + p3;
+  });
+
+  // Mask Phone numbers (common US formats)
+  text = text.replace(/\b(\d{3})[-.]?(\d{3})[-.]?(\d{4})\b/g, '***-***-$3');
+
+  // Mask SSN
+  text = text.replace(/\b(\d{3})[-.]?(\d{2})[-.]?(\d{4})\b/g, '***-**-****');
+
+  // Mask Credit Cards
+  text = text.replace(/\b(?:\d[ -]*?){13,16}\b/g, match => {
+      const last4 = match.replace(/[ -]/g, '').slice(-4);
+      return `****-****-****-${last4}`;
+  });
+
+  return text;
+}
+
 export function createAuditLog(
   logs: AuditTrail[],
   action: string,
@@ -22,11 +46,13 @@ export function createAuditLog(
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
+  const redactedDetails = redactPII(details);
+
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp,
     action,
-    details,
+    details: redactedDetails,
     author,
     hash
   };
