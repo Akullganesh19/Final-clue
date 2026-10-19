@@ -1,0 +1,6 @@
+## 2023-10-25 — Structural PII Redaction in Audit Logs
+**Data traced:** Emails, SSNs, Phone numbers, and Credit Card numbers in action details and author strings.
+**Exposure found:** PII was passed directly to \`createAuditLog\` in \`src/utils/audit.ts\`, causing it to be permanently logged in plaintext within the \`details\` and \`author\` fields, and incorporated into the immutable audit trail hash.
+**Fix:** Implemented a structural regex-based \`redactPII\` function in \`src/utils/audit.ts\` that irreversibly masks sensitive fields while preserving context (e.g., \`j***@example.com\`, \`***-**-1234\`). Modified \`createAuditLog\` to pass \`details\` and \`author\` through this redaction function before hashing or storage.
+**Coverage confirmed:** Created \`src/utils/audit.test.ts\` verifying redaction of Emails, SSNs, Phones, and Credit Cards, and confirmed that \`createAuditLog\` generates properly redacted logs and hashes them correctly without altering non-PII values.
+**Still exposed elsewhere:** Potential frontend components rendering previously stored unredacted audit trails; no complete structural deletion mechanism was verified across the broader case/linkage stores (e.g., \`Case\` and \`Linkage\` records containing narratives).
