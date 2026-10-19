@@ -1,0 +1,6 @@
+## 2025-07-08 — Audit Log Double-Entry Prevention
+**Value type:** Audit Trail (Append-Only Log)
+**Drift risk found:** The `createAuditLog` function lacked idempotency protection. If a network request failed and was retried, or a webhook was processed twice, duplicate log entries could be appended to the audit trail, violating the integrity of the sequence. Additionally, the log utilized an insecure client-side hashing mechanism that provided security theater but no real data integrity guarantees.
+**Fix:** Removed the ineffective client-side hash chain and introduced an optional `idempotencyKey` to the `AuditTrail` type. Updated `createAuditLog` to accept this key and perform an early return with the unmodified log array if an exact match is found, preventing double-appending.
+**Proven by:** Simulated a retry/duplicate scenario in `src/utils/audit.test.ts` where a subsequent call with an existing idempotency key resolves correctly without modifying the array.
+**Other balances to check:** Any other list, queue, or array updates that append state (e.g., adding evidence) need to check for idempotency.
