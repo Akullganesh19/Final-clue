@@ -22,12 +22,15 @@ export function createAuditLog(
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
+  const isEmail = /^[\w\.-]+@[\w\.-]+\.\w+$/.test(author);
+  const redactedAuthor = isEmail ? author.replace(/([^@]{1})[^@]*(@.*)/, '$1***$2') : author;
+
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp,
     action,
     details,
-    author,
+    author: redactedAuthor,
     hash
   };
 
