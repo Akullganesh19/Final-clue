@@ -1,0 +1,6 @@
+## 2024-05-24 — Serial Cluster Detection
+**Product understood as:** A multi-agent case-linkage and evidence-triage system that helps investigators link individual cold cases together.
+**Derivation reasoning:** The product currently stores individual cases and pairwise linkages between them. Investigators analyze links between two cases at a time. However, a series of strongly linked cases (A->B, B->C) logically indicates a larger serial pattern or a single perpetrator across multiple incidents. The product has all the data (cases and linkages) but lacks the insight to automatically detect these larger connected components (clusters) and their shared Modus Operandi (MO) features.
+**Feature built:** A utility to automatically detect "Serial Clusters" by identifying connected components in the case linkage graph and extracting the core Modus Operandi shared across the entire cluster.
+**User impact:** Investigators can now instantly see larger serial patterns involving 3 or more cases, rather than just isolated pairs, along with the defining MO characteristics of the entire cluster.
+**Next logical feature:** A dashboard view or visualization specifically tailored for tracking and monitoring identified serial clusters over time as new cases get added to the system.
