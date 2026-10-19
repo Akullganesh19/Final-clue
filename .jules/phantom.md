@@ -1,0 +1,7 @@
+## 2025-03-09 — Fetch Request Coalescing Added
+**Gap found:** The frontend had no request deduplication mechanism. Multiple components mounting simultaneously could trigger independent API calls for the same resource, wasting network bandwidth, client CPU cycles, and backend capacity.
+**Why it existed:** It is typical to rely on simple `fetch` calls during initial build and multi-agent development until an application grows complex enough that redundant fetching becomes a felt latency issue.
+**Built:** A `fetch` override globally injected at initialization (`src/main.tsx`). It intercepts `fetch`, generates a deterministic cache key for concurrent identical GET requests, and caches the in-flight Promise. Subsequent identical requests join the Promise instead of launching new network requests, cloning the response object appropriately.
+**Hot path affected:** Any data-fetching operation that occurs when multiple views or nested components attempt to load the same contextual data simultaneously.
+**Measurable improvement:** Reduces the number of redundant HTTP calls during heavy concurrent component mounting, decreasing perceived load times and bandwidth consumption. Measurable by analyzing the Network tab or counting specific backend API access logs.
+**Next opportunity:** Investigate the `stale-while-revalidate` pattern for specific high-read, low-write endpoints, or background queue processing for non-critical user interactions.
