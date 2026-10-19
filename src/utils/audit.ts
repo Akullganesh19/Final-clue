@@ -1,5 +1,9 @@
 import { AuditTrail } from '../types';
 
+/**
+ * @deprecated Legacy hash generator. Vulnerable to collisions.
+ * Kept for validating historical audit logs. Use generateAuditHashV2 instead.
+ */
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
   let hash = 0;
@@ -11,6 +15,17 @@ export function generateAuditHash(previousHash: string, action: string, details:
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
 
+export function generateAuditHashV2(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
+  const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < combined.length; i++) {
+    hash ^= combined.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+    hash >>>= 0;
+  }
+  return 'CHK-V2-' + (hash >>> 0).toString(16).toUpperCase().padStart(8, '0');
+}
+
 export function createAuditLog(
   logs: AuditTrail[],
   action: string,
@@ -20,7 +35,8 @@ export function createAuditLog(
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+  // TODO(Horizon): Phase 2 - fully remove V1 once historical chains are re-signed or migrated.
+  const hash = generateAuditHashV2(previousHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
