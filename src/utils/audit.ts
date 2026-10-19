@@ -15,10 +15,16 @@ export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
-  author: string = "Investigator (Arjun Som)"
+  author: string = "Investigator (Arjun Som)",
+  expectedParentHash?: string
 ): AuditTrail[] {
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+
+  if (expectedParentHash && expectedParentHash !== previousHash) {
+    throw new Error(`Concurrency error: Expected parent hash ${expectedParentHash} but found ${previousHash}`);
+  }
+
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
