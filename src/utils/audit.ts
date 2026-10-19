@@ -1,5 +1,30 @@
 import { AuditTrail } from '../types';
 
+export function redactPII(text: string): string {
+  if (!text) return text;
+
+  let redacted = text;
+
+  // Emails: j***@example.com
+  redacted = redacted.replace(/\b([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*(@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g, '$1***$2');
+
+  // SSNs: ***-**-1234
+  redacted = redacted.replace(/\b\d{3}-\d{2}-(\d{4})\b/g, '***-**-$1');
+
+  // Credit cards
+  redacted = redacted.replace(/\b(?:\d{4}[ -]){3}(\d{4})\b/g, '****-****-****-$1');
+
+  // Phone numbers
+  redacted = redacted.replace(/(?:\b|\()\d{3}[-.)\s]+\d{3}[-.\s]+(\d{4})\b/g, (match) => {
+    if (match.startsWith('(')) {
+      return '(***) ***-' + match.slice(-4);
+    }
+    return '***-***-' + match.slice(-4);
+  });
+
+  return redacted;
+}
+
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
   let hash = 0;
@@ -17,16 +42,19 @@ export function createAuditLog(
   details: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
+  const redactedAction = redactPII(action);
+  const redactedDetails = redactPII(details);
+
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+  const hash = generateAuditHash(previousHash, redactedAction, redactedDetails, author, timestamp);
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp,
-    action,
-    details,
+    action: redactedAction,
+    details: redactedDetails,
     author,
     hash
   };
