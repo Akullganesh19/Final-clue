@@ -23,7 +23,68 @@ export function createAuditLog(
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
-    id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    id: (() => {
+      try {
+        if (typeof globalThis !== 'undefined' && globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') {
+          return globalThis.crypto.randomUUID();
+        }
+      } catch (e) {}
+      console.warn('[Genesis Recovery] UUID generator unavailable, falling back to pseudo-random ID.');
+      return `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    })(),
+    timestamp,
+    action,
+    details,
+    author,
+    hash
+  };
+
+  return [...logs, newLog];
+}
+
+export async function generateAuditHashAsync(previousHash: string, action: string, details: string, author: string, timestamp: string): Promise<string> {
+  const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+
+  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) {
+      try {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(combined);
+          const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          return 'CHK-' + hashHex.substring(0, 8).toUpperCase();
+      } catch (e) {
+          console.warn('[Genesis Recovery] Web Crypto API failed, falling back to sync hash.', e);
+      }
+  }
+  console.warn('[Genesis Recovery] Web Crypto API unavailable, falling back to sync hash.');
+  return generateAuditHash(previousHash, action, details, author, timestamp);
+}
+
+export async function createAuditLogAsync(
+  logs: AuditTrail[],
+  action: string,
+  details: string,
+  author: string = "Investigator (Arjun Som)"
+): Promise<AuditTrail[]> {
+  const lastLog = logs[logs.length - 1];
+  const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+  const timestamp = new Date().toISOString();
+  const hash = await generateAuditHashAsync(previousHash, action, details, author, timestamp);
+
+  let id;
+  try {
+    if (typeof globalThis !== 'undefined' && globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') {
+      id = globalThis.crypto.randomUUID();
+    }
+  } catch (e) {}
+  if(!id){
+     console.warn('[Genesis Recovery] UUID generator unavailable, falling back to pseudo-random ID.');
+     id = `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  }
+
+  const newLog: AuditTrail = {
+    id,
     timestamp,
     action,
     details,
