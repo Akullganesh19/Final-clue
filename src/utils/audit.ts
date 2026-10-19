@@ -15,8 +15,17 @@ export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
+  idempotencyKey: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
+  if (idempotencyKey) {
+    const existingLog = logs.find(log => log.idempotencyKey === idempotencyKey);
+    if (existingLog) {
+      console.warn('Duplicate audit log idempotency key detected:', idempotencyKey);
+      return logs;
+    }
+  }
+
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
@@ -28,7 +37,8 @@ export function createAuditLog(
     action,
     details,
     author,
-    hash
+    hash,
+    idempotencyKey
   };
 
   return [...logs, newLog];
