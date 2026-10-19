@@ -1,7 +1,8 @@
 import { AuditTrail } from '../types';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
-  const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+  // Use JSON.stringify to safely serialize the inputs without risking delimiter injection
+  const combined = JSON.stringify([previousHash, action, details, author, timestamp]);
   let hash = 0;
   for (let i = 0; i < combined.length; i++) {
     const char = combined.charCodeAt(i);
