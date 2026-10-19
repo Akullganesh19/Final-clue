@@ -33,3 +33,18 @@ export function createAuditLog(
 
   return [...logs, newLog];
 }
+export function verifyAuditChain(logs: AuditTrail[]): { isValid: boolean; corruptedIndex?: number } {
+  if (!logs || logs.length === 0) return { isValid: true };
+
+  for (let i = 0; i < logs.length; i++) {
+    const currentLog = logs[i];
+    const previousHash = i === 0 ? 'CHK-ROOT-GENESIS-CHAIN-STABLE' : logs[i - 1].hash;
+    const expectedHash = generateAuditHash(previousHash, currentLog.action, currentLog.details, currentLog.author, currentLog.timestamp);
+
+    if (currentLog.hash !== expectedHash) {
+      return { isValid: false, corruptedIndex: i };
+    }
+  }
+
+  return { isValid: true };
+}
