@@ -1,7 +1,7 @@
 import { AuditTrail } from '../types';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
-  const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+  const combined = JSON.stringify({ previousHash, action, details, author, timestamp });
   let hash = 0;
   for (let i = 0; i < combined.length; i++) {
     const char = combined.charCodeAt(i);
@@ -15,8 +15,18 @@ export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
+  idempotencyKey: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
+  if (!idempotencyKey) {
+    throw new Error("idempotencyKey is required for audit logs to prevent drift.");
+  }
+
+  if (logs.some(log => log.idempotencyKey === idempotencyKey)) {
+    console.warn(`[Audit] Idempotency key ${idempotencyKey} already seen, skipping.`);
+    return logs;
+  }
+
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
@@ -28,7 +38,8 @@ export function createAuditLog(
     action,
     details,
     author,
-    hash
+    hash,
+    idempotencyKey
   };
 
   return [...logs, newLog];
