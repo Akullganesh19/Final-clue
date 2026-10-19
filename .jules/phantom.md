@@ -1,0 +1,7 @@
+## 2025-02-28 — Request Coalescing and Intelligent Caching
+**Gap found:** The frontend application made native `fetch` calls independently, meaning multiple components requesting the same API endpoint would trigger duplicate concurrent network requests. There was also no caching mechanism for slowly-changing data, causing redundant fetches across navigations.
+**Why it existed:** Initially, the application was built straightforwardly without considering the performance overhead of independent component data fetching, prioritizing functional delivery over optimized data flow.
+**Built:** Created an intelligent `apiClient.ts` providing `dedupedFetch`. This utility implements Request Coalescing (using an in-flight map to join duplicate simultaneous requests) and Stale-While-Revalidate caching (serving instantly from cache while refreshing in the background).
+**Hot path affected:** Any repeated API fetching or concurrent data fetching in the React components, significantly dropping network pressure on load and navigation.
+**Measurable improvement:** Reduces redundant concurrent network requests to 1 per identical URL. Lowers perceived latency for cached data to ~0ms.
+**Next opportunity:** Background pre-computation for network heavy graphs or intelligent pre-fetching of case details when a user hovers over a case link.
