@@ -61,3 +61,9 @@ export interface SystemWeights {
   temporal: number; // e.g. 0.2
   mo: number;       // e.g. 0.2
 }
+
+export interface CaseCluster {
+  id: string;
+  cases: Case[];
+  linkages: Linkage[];
+}

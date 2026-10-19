@@ -1,0 +1,6 @@
+## 2025-07-06 — Case Clustering
+**Product understood as:** A multi-agent cold case system that uses semantic similarity to find pairwise linkages between disconnected cases.
+**Derivation reasoning:** The system currently identifies individual pairwise linkages between two cases (e.g. Case A links to Case B, Case B links to Case C). However, it never groups these pairwise linkages into larger macro patterns or serial clusters (Case A, B, and C as a single series). Serial offender investigations fundamentally rely on macro patterns, not just pairs. Since all the underlying linkage graph data already exists, we can easily run a connected-components traversal to expose these hidden clusters to the investigator.
+**Feature built:** Added a graph traversal algorithm (`generateCaseClusters` in `src/utils/clustering.ts`) that groups connected cases and their linkages into a `CaseCluster` interface.
+**User impact:** Users can now see entire serial patterns and macro clusters instead of only seeing isolated A-to-B linkages, vastly improving their ability to recognize broader patterns of criminal activity.
+**Next logical feature:** Generating automated narrative summaries or timelines for each discovered CaseCluster to provide an immediate briefing on the series.
