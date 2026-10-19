@@ -11,11 +11,17 @@ export function generateAuditHash(previousHash: string, action: string, details:
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
 
+import { ActionPredictor } from './oracle';
+
+// Global singleton instance for prediction
+const predictor = new ActionPredictor();
+
 export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
-  author: string = "Investigator (Arjun Som)"
+  author: string = "Investigator (Arjun Som)",
+  userPermissions: string[] = ['VIEW_CASE', 'VIEW_EVIDENCE', 'LINK_CASE', 'VIEW_NETWORK']
 ): AuditTrail[] {
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
@@ -31,5 +37,14 @@ export function createAuditLog(
     hash
   };
 
-  return [...logs, newLog];
+  const updatedLogs = [...logs, newLog];
+
+  // Asynchronously train the predictor and prefetch based on this action
+  setTimeout(() => {
+    predictor.analyzeHistory(updatedLogs);
+    const predictions = predictor.predictNextActions(action, userPermissions);
+    predictor.prefetch(predictions);
+  }, 0);
+
+  return updatedLogs;
 }
