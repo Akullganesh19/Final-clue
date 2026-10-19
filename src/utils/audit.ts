@@ -15,10 +15,16 @@ export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
-  author: string = "Investigator (Arjun Som)"
+  author: string = "Investigator (Arjun Som)",
+  expectedPreviousHash?: string
 ): AuditTrail[] {
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+
+  if (expectedPreviousHash && expectedPreviousHash !== previousHash) {
+    throw new Error(`Concurrency mismatch: Expected previous hash ${expectedPreviousHash}, but actual was ${previousHash}. Another operation may have modified the state concurrently.`);
+  }
+
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
