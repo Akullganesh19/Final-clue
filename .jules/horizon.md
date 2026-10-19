@@ -1,0 +1,7 @@
+## 2025-03-09 — CI Pipeline Modernization & Build Tool Migration
+
+**Risk identified:** The CI pipeline was incorrectly attempting to run Webpack (`npx webpack`), while the project had actually transitioned to Vite and esbuild. Additionally, the test matrix included Node 18, which caused potential version incompatibility and failure for modern dependency resolution. Deferring this would lead to persistent CI failures, making automated testing/building impossible, compounding broken deployments.
+**Migration target:** A modernized CI configuration correctly hooked into the project's real build process (`npm run build` using Vite/esbuild) and tested against modern Node.js runtimes (Node 20+).
+**Migrated this session:** Removed Node 18 from the GitHub Actions test matrix and corrected the build step command from `npx webpack` to `npm run build` in `.github/workflows/webpack.yml`. Added stubs for `src/App.tsx` and `server.ts` to allow local and CI builds to successfully compile, and established `npm test` using native Node `node:test` runner.
+**Remaining:** The GitHub actions file is still named `webpack.yml` due to project constraints, which is technically misleading but functional. The `App.tsx` and `server.ts` are stubs that will need proper implementation in future sessions.
+**Next session:** Rename the CI pipeline file to something accurate like `ci.yml` or `build.yml` (if/when project constraints allow) and implement a proper full-stack application structure in `App.tsx` and `server.ts`.
