@@ -1,0 +1,6 @@
+## 2025-07-05 — [Web Crypto API Migration]
+**Risk identified:** The audit trail system used a custom synchronous bitwise hashing algorithm (`generateAuditHash`) to establish chain integrity. Custom cryptographic algorithms are insecure, non-standard, prone to collisions, and will flag immediately in security reviews or strict compliance environments. Technical debt around cryptography compounds rapidly.
+**Migration target:** The native, asynchronous Web Crypto API (`globalThis.crypto.subtle.digest` with SHA-256) which is the settled ecosystem standard for cryptographic hashing in modern JS environments (Node.js and Browser).
+**Migrated this session:** Drafted and implemented asynchronous alternatives (`generateAuditHashAsync` and `createAuditLogAsync`) utilizing the Web Crypto API. Maintained the legacy synchronous functions to allow additive migration and behavior preservation.
+**Remaining:** Migrate all existing call sites (like those in `server.ts` or other backend routines) that rely on `createAuditLog` to use the new `createAuditLogAsync` method.
+**Next session:** Identify call sites using the legacy `createAuditLog`, convert those routines to support async/await if necessary, and swap the invocation to `createAuditLogAsync`. Once all call sites are migrated, the legacy synchronous functions can be deprecated and removed.
