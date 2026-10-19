@@ -1,3 +1,4 @@
+import { predictor } from './NextActionPredictor.js';
 import { AuditTrail } from '../types';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
@@ -21,6 +22,9 @@ export function createAuditLog(
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+
+  predictor.train(action);
+
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
