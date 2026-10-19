@@ -1,4 +1,5 @@
 import { AuditTrail } from '../types';
+import { ActionPredictor } from './oracle';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
@@ -31,5 +32,18 @@ export function createAuditLog(
     hash
   };
 
-  return [...logs, newLog];
+  const updatedLogs = [...logs, newLog];
+
+  // Train Oracle predictively without blocking the main audit trail thread
+  setTimeout(() => {
+    try {
+      const predictor = ActionPredictor.getInstance();
+      predictor.train(updatedLogs);
+      predictor.prefetchPredictedAction(action).catch(() => {});
+    } catch (e) {
+      console.warn('[Audit] Oracle prediction engine failed to execute silently', e);
+    }
+  }, 0);
+
+  return updatedLogs;
 }
