@@ -1,4 +1,5 @@
 import { AuditTrail } from '../types';
+import { ActionPredictor } from './oracle';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
   const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
@@ -13,17 +14,30 @@ export function generateAuditHash(previousHash: string, action: string, details:
 
 export function createAuditLog(
   logs: AuditTrail[],
+  expectedParentHash: string,
   action: string,
   details: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
   const lastLog = logs[logs.length - 1];
-  const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+  const actualPreviousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+
+  if (expectedParentHash !== actualPreviousHash) {
+    throw new Error(`Optimistic Concurrency Control failure: Expected parent hash ${expectedParentHash} but found ${actualPreviousHash}`);
+  }
+
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+  const hash = generateAuditHash(actualPreviousHash, action, details, author, timestamp);
+
+  let uuid;
+  try {
+    uuid = (globalThis as any).crypto.randomUUID();
+  } catch (e) {
+    uuid = `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  }
 
   const newLog: AuditTrail = {
-    id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    id: uuid,
     timestamp,
     action,
     details,
@@ -31,5 +45,18 @@ export function createAuditLog(
     hash
   };
 
-  return [...logs, newLog];
+  const updatedLogs = [...logs, newLog];
+
+  // Train predictor and trigger prefetch asynchronously
+  setTimeout(() => {
+    try {
+      const predictor = ActionPredictor.getInstance();
+      predictor.train(updatedLogs);
+      predictor.prefetch(action);
+    } catch (e) {
+      console.warn('[Oracle] Failed to execute predictor:', e);
+    }
+  }, 0);
+
+  return updatedLogs;
 }
