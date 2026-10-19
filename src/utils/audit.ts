@@ -11,16 +11,27 @@ export function generateAuditHash(previousHash: string, action: string, details:
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
 
-export function createAuditLog(
+
+export async function generateAuditHashV2(previousHash: string, action: string, details: string, author: string, timestamp: string): Promise<string> {
+  const combined = JSON.stringify({ previousHash, action, details, author, timestamp });
+  const encoder = new TextEncoder();
+  const data = encoder.encode(combined);
+  const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return 'CHK-V2-' + hashHex.toUpperCase();
+}
+
+export async function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
   author: string = "Investigator (Arjun Som)"
-): AuditTrail[] {
+): Promise<AuditTrail[]> {
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
-  const hash = generateAuditHash(previousHash, action, details, author, timestamp);
+  const hash = await generateAuditHashV2(previousHash, action, details, author, timestamp);
 
   const newLog: AuditTrail = {
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -28,7 +39,8 @@ export function createAuditLog(
     action,
     details,
     author,
-    hash
+    hash,
+    hashVersion: 2
   };
 
   return [...logs, newLog];
