@@ -11,6 +11,10 @@ export function generateAuditHash(previousHash: string, action: string, details:
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
 
+function redactEmail(text: string): string {
+  return text.replace(/\b([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g, '$1***@$2');
+}
+
 export function createAuditLog(
   logs: AuditTrail[],
   action: string,
@@ -26,8 +30,8 @@ export function createAuditLog(
     id: `AUDIT-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     timestamp,
     action,
-    details,
-    author,
+    details: redactEmail(details),
+    author: redactEmail(author),
     hash
   };
 
