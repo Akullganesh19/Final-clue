@@ -1,7 +1,7 @@
 import { AuditTrail } from '../types';
 
 export function generateAuditHash(previousHash: string, action: string, details: string, author: string, timestamp: string): string {
-  const combined = `${previousHash}|${action}|${details}|${author}|${timestamp}`;
+  const combined = JSON.stringify([previousHash, action, details, author, timestamp]);
   let hash = 0;
   for (let i = 0; i < combined.length; i++) {
     const char = combined.charCodeAt(i);
@@ -17,7 +17,8 @@ export function createAuditLog(
   details: string,
   author: string = "Investigator (Arjun Som)"
 ): AuditTrail[] {
-  const lastLog = logs[logs.length - 1];
+  const safeLogs = logs || [];
+  const lastLog = safeLogs[safeLogs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
@@ -31,5 +32,5 @@ export function createAuditLog(
     hash
   };
 
-  return [...logs, newLog];
+  return [...safeLogs, newLog];
 }
