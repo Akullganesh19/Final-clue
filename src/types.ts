@@ -61,3 +61,16 @@ export interface SystemWeights {
   temporal: number; // e.g. 0.2
   mo: number;       // e.g. 0.2
 }
+export interface HotEntity {
+  name: string;
+  type: 'person' | 'vehicle' | 'location' | 'weapon';
+  count: number;
+  caseIds: string[];
+}
+
+export interface EntityRadarData {
+  persons: HotEntity[];
+  vehicles: HotEntity[];
+  locations: HotEntity[];
+  weapons: HotEntity[];
+}

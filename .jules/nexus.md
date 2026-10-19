@@ -1,0 +1,6 @@
+## 2024-06-27 — Global Entity Radar
+**Product understood as:** A multi-agent case-linkage system that analyzes cold cases and extracts entities (people, vehicles, locations, weapons) to find pairwise connections.
+**Derivation reasoning:** This product stores detailed entities for every case. Users investigate these cases to find links. Therefore users obviously need a global view of recurring entities across ALL cases (not just pairwise links) — because spotting that "Silver Honda Civic" or ".38 caliber revolver" appears across 5 unlinked cases is an immediate investigative lead. It doesn't exist because the system was designed bottom-up for pairwise linkage rather than top-down aggregation. I'm building it because it surfaces latent patterns instantly and gives investigators a new way to start an investigation.
+**Feature built:** A Global Entity Radar that aggregates and counts all entities across the case database, surfacing the most frequent persons, vehicles, locations, and weapons globally.
+**User impact:** Investigators can now spot macro-trends and cross-case recurrences at a glance, allowing them to search for a specific entity to find previously unnoticed case links.
+**Next logical feature:** Automated alerts when a newly added case contains a "Hot Entity" from the radar.
