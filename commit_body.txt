@@ -1,0 +1,8 @@
+## ⚖️ Data Governance Fix
+
+**What:** Closed systemic exposure where plain-text PII was logged into the internal `AuditTrail` records and encoded directly into their blockchain-style integrity hashes.
+**Data classification:** PII, encompassing user Emails, Social Security Numbers (SSN), Phone Numbers, and Credit Card Numbers.
+**Exposure before:** `createAuditLog` previously passed raw `action` and `details` fields into `generateAuditHash` and stored the data. Unredacted logs leaked sensitive info to any dashboard or reviewer with read access. Hashing raw data also broke future potential sanitation attempts, as wiping the records retroactively would invalidate the chain's hash.
+**Fix:** Created `redactPII` utility to mask values via RegEx (e.g. `j***@gmail.com`, `***-**-****`, etc) preserving minimal debug context. Altered `createAuditLog` to redact the payload *before* hashing and persisting to `logs`.
+**Verified:** Configured Node's native test runner (`node:test`) via `package.json`. Wrote assertions covering positive structural matching for all 4 PII patterns. Tested `createAuditLog` to confirm the generated hash derives strictly from the already-redacted text arrays and that returned `AuditTrail` models expose only masked data.
+**Remaining gaps:** Unclear if the same unredacted strings might be handed to the upstream GenAI LLMs (Gemini API) during case inference processes, or if frontend case visualization nodes render strings with PII directly into standard console elements.
