@@ -55,6 +55,15 @@ export interface AuditTrail {
   hash: string;
 }
 
+export interface CaseCluster {
+  id: string;
+  cases: Case[];
+  linkages: Linkage[];
+  averageConfidence: number;
+  primaryLocations: string[];
+  primaryMoCategories: string[];
+}
+
 export interface SystemWeights {
   semantic: number; // e.g. 0.3
   entity: number;   // e.g. 0.3
