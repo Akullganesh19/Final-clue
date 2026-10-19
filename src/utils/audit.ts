@@ -11,14 +11,28 @@ export function generateAuditHash(previousHash: string, action: string, details:
   return 'CHK-' + Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
 }
 
+export class AuditChainConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AuditChainConflictError';
+  }
+}
+
 export function createAuditLog(
   logs: AuditTrail[],
   action: string,
   details: string,
-  author: string = "Investigator (Arjun Som)"
+  author: string = "Investigator (Arjun Som)",
+  expectedPreviousHash?: string
 ): AuditTrail[] {
   const lastLog = logs[logs.length - 1];
   const previousHash = lastLog ? lastLog.hash : 'CHK-ROOT-GENESIS-CHAIN-STABLE';
+
+  if (expectedPreviousHash !== undefined && expectedPreviousHash !== previousHash) {
+    throw new AuditChainConflictError(
+      `Audit chain conflict: expected previous hash ${expectedPreviousHash}, but got ${previousHash}. The audit trail was modified concurrently.`
+    );
+  }
   const timestamp = new Date().toISOString();
   const hash = generateAuditHash(previousHash, action, details, author, timestamp);
 
