@@ -1,0 +1,6 @@
+## 2023-10-27 — Agent ↔ Audit Ledger Bridge
+**Systems connected:** AI Agents ↔ Audit Ledger
+**Intelligence emerged:** Actions taken autonomously by AI Agents are now immutably cryptographically hashed and logged directly into the system's Audit Ledger. Previously, agent logs and investigator audit trails were isolated; now investigators can trace agent reasoning directly within the same immutable ledger they use for their own case linkages.
+**Data flows:** Agent execution components emit `agent.log` events (`{type: 'action', agent: 'Retrieval', message: '...'}`) onto the EventBus. The bridge listens to these events and asynchronously invokes the Audit Ledger's `createAuditLog` method, appending it securely to the global React state using state updaters.
+**Coupling approach:** The AI Agents and the Audit Ledger are entirely loosely coupled. They do not import each other. A lightweight `EventBus` handles pub/sub, and an isolated `agentAuditBridge` listens to events and pushes them to the ledger. This means if we remove the ledger or swap the agents, neither system breaks.
+**Next connection:** Errors ↔ Users (Notifying users when they encounter known/tracked issues silently, so they know it's being worked on).
