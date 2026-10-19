@@ -13,7 +13,7 @@ A multi-agent case-linkage & evidence-triage system for cold cases, featuring an
 
 ## Prerequisites
 
-- Node.js (v18 or higher)
+- Node.js (v20 or higher)
 - npm or yarn
 - Gemini API key
 
